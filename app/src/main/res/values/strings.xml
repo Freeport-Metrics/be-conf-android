@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Beaconf</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_send">OK</string>
+    <string name="title_activity_display_message">DisplayMessageActivity</string>
+    <string name="title_activity_server_error">ServerErrorActivity</string>
+</resources>

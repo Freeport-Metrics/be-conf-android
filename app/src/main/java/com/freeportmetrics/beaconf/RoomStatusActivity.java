@@ -164,19 +164,17 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println(args[0]);
                     JSONObject data = (JSONObject) args[0];
-
-                    String beaconId;
-                    String roomRadius;
-                    Log.i(TAG, data.toString());
+                    roomInfoMap.clear();
                     try {
-                        beaconId = data.getString("b_id");
-                        roomRadius = data.getString("room_radius");
-                        Log.i(TAG, "### received config from server");
-                        Log.i(TAG, "beaconId: "+beaconId);
-                        Log.i(TAG, "roomRadius: "+roomRadius);
-
+                        JSONArray config = data.getJSONArray("config");
+                        for (int i = 0; i < config.length(); i++) {
+                            JSONObject configItem = config.getJSONObject(i);
+                            String roomId = configItem.getString("b_id");
+                            double roomRadius = configItem.getDouble("room_radius");
+                            RoomInfo roomInfo = new RoomInfo(roomId, false, roomRadius);
+                            roomInfoMap.put(configItem.getString("b_id"), roomInfo);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         return;

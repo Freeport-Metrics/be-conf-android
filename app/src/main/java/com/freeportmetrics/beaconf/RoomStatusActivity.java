@@ -1,7 +1,6 @@
 package com.freeportmetrics.beaconf;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +39,8 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     private HashMap<String,RoomInfo> roomInfoMap = new HashMap<String,RoomInfo>();
     private String userId;
     private LinearLayout linearLayout;
+    private LinearLayout debugLayout;
+    private TextView debugTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,24 +58,40 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         beaconManager.bind(this);
 
         linearLayout = (LinearLayout) findViewById(R.id.locations_table);
+
+        // DEBUG
+        debugLayout = (LinearLayout) findViewById(R.id.debug_view);
+        debugTextView = new TextView(this);
+        debugTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
+        debugLayout.addView(debugTextView);
     }
 
     ///////////////////////////////////////
-    // updating UI based on JSON message //
+    // updating data based on JSON message //
     ///////////////////////////////////////
-    private void refreshUI(JSONObject roomStatusMessage){
+    private void refreshRoomState(JSONObject roomStatusMessage){
         linearLayout.removeAllViews();
+
         try {
             JSONArray rooms = roomStatusMessage.getJSONArray("rooms");
             for (int i = 0 ; i < rooms.length(); i++) {
                 JSONObject room = rooms.getJSONObject(i);
                 String roomLabel = room.getString("label");
+                String roomId = room.getString("room_id");
+
                 StringBuilder sb = new StringBuilder();
                 JSONArray users = room.getJSONArray("users");
+                RoomInfo roomInfo = roomInfoMap.get(roomId);
+                roomInfo.getUsers().clear();
                 for (int j = 0 ; j < users.length(); j++) {
                     String user = users.getString(j);
                     sb.append(user);
                     if (j!=users.length()-1) sb.append(", ");
+
+                    // updating room information
+                    if (roomInfo != null) {
+                        roomInfo.getUsers().add(user);
+                    }
                 }
                 if (users.length()==0) sb.append("-");
                 linearLayout.addView(createTextView(roomLabel, sb.toString()));
@@ -111,22 +129,32 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     public void onBeaconServiceConnect() {
         beaconManager.setRangeNotifier(new RangeNotifier() {
             @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                for (Beacon beacon: beacons){
-                    String roomId = beacon.getId2()+"_"+beacon.getId3();
-                    double distance = beacon.getDistance();
-                    RoomInfo roomInfo = roomInfoMap.get(roomId);
-                    if (roomInfo != null){
-                        // check if user entered the room
-                        if (distance < roomInfo.getRoomRadius() && !roomInfo.isOccupied()) {
-                            emitEnterRoomEvent(roomId);
-                            roomInfo.setOccupied(true);
-                        } else if (distance > roomInfo.getRoomRadius() && roomInfo.isOccupied()){ // check if user left the room
-                            emitLeaveRoomEvent(roomId);
-                            roomInfo.setOccupied(false);
+            public void didRangeBeaconsInRegion(final Collection<Beacon> beacons, Region region) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String debug = "";
+
+                        for(Beacon beacon:beacons){
+                            String roomId = beacon.getId2() + "_" + beacon.getId3();
+                            double distance = beacon.getDistance();
+                            if(debugTextView.getText().length()>500){
+                                debugTextView.setText("");
+                            }
+                            debugTextView.setText(debugTextView.getText()+"DEBUG: roomId: " + roomId + ", distance: " + distance + '\n');
+
+                            RoomInfo roomInfo = roomInfoMap.get(roomId);
+                            if (roomInfo != null) {
+                                // check if user entered the room
+                                if (distance < roomInfo.getRoomRadius() && !roomInfo.getUsers().contains(userId)) {
+                                    emitEnterRoomEvent(roomId);
+                                } else if (distance > roomInfo.getRoomRadius() && roomInfo.getUsers().contains(userId)) { // check if user left the room
+                                    emitLeaveRoomEvent(roomId);
+                                }
+                            }
                         }
                     }
-                }
+                });
             }
         });
 
@@ -171,8 +199,10 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                         for (int i = 0; i < config.length(); i++) {
                             JSONObject configItem = config.getJSONObject(i);
                             String roomId = configItem.getString("b_id");
-                            double roomRadius = configItem.getDouble("room_radius");
-                            RoomInfo roomInfo = new RoomInfo(roomId, false, roomRadius);
+                            // DEBUG
+                            //double roomRadius = configItem.getDouble("room_radius");
+                            double roomRadius = 1.0;
+                            RoomInfo roomInfo = new RoomInfo(roomId, roomRadius, new ArrayList());
                             roomInfoMap.put(configItem.getString("b_id"), roomInfo);
                         }
                     } catch (JSONException e) {
@@ -190,9 +220,9 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println(args[0]);
+                    System.out.println("Room status message: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
-                    refreshUI(data);
+                    refreshRoomState(data);
                 }
             });
         }
@@ -200,21 +230,13 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
 
     // emitted events
     public void emitEnterRoomEvent(String roomId){
-        Log.i(TAG, "Sending event to server, userId: " + userId + ", roomId: " + roomId);
-        mSocket.emit("enterRoom", "{\"user_id\":\""+userId+"\",\"room_id\":\""+roomId+"\"}");
+        Log.i(TAG, "Sending enter event to server, userId: " + userId + ", roomId: " + roomId);
+        mSocket.emit("enterRoom", "{\"user_id\":\"" + userId + "\",\"room_id\":\"" + roomId + "\"}");
     }
 
     public void emitLeaveRoomEvent(String roomId){
-        Log.i(TAG, "Sending event to server, userId: " + userId + ", roomId: " + roomId);
+        Log.i(TAG, "Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
         mSocket.emit("leaveRoom", "{\"user_id\":\"" + userId + "\",\"room_id\":\"" + roomId + "\"}");
-    }
-
-    // debug
-    public void emitEnterRoomEventAction(View view){
-        emitEnterRoomEvent("5919_60231");
-    }
-    public void emitLeaveRoomEventAction(View view){
-        emitLeaveRoomEvent("5919_60231");
     }
 
     @Override

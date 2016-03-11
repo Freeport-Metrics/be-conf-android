@@ -1,17 +1,19 @@
 package com.freeportmetrics.beaconf;
 
+import java.util.ArrayList;
+
 /**
  * Created by marcin on 3/10/2016.
  */
 public class RoomInfo {
     private String id;
-    private boolean occupied;
     private double roomRadius;
+    private ArrayList users;
 
-    public RoomInfo(String id, boolean occupied, double roomRadius) {
+    public RoomInfo(String id, double roomRadius, ArrayList users) {
         this.id = id;
-        this.occupied = occupied;
         this.roomRadius = roomRadius;
+        this.users = users;
     }
 
     public String getId() {
@@ -22,19 +24,19 @@ public class RoomInfo {
         this.id = id;
     }
 
-    public boolean isOccupied() {
-        return occupied;
-    }
-
-    public void setOccupied(boolean occupied) {
-        this.occupied = occupied;
-    }
-
     public double getRoomRadius() {
         return roomRadius;
     }
 
     public void setRoomRadius(double roomRadius) {
         this.roomRadius = roomRadius;
+    }
+
+    public ArrayList getUsers() {
+        return users;
+    }
+
+    public void setUsers(ArrayList users) {
+        this.users = users;
     }
 }

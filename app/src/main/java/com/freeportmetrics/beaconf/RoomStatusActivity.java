@@ -28,6 +28,7 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +38,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     private BeaconManager beaconManager;
     private HashMap<String,RoomInfo> roomInfoMap = new HashMap<String,RoomInfo>();
     private String userId;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +55,38 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         beaconManager.bind(this);
 
-        // UI
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.locations_table);
-        linearLayout.addView(createTextView("Conference Room 1", "Tomek, Marcin, Janek"));
-        linearLayout.addView(createSeparatorView());
-        linearLayout.addView(createTextView("Conference Room 2", " -"));
-        linearLayout.addView(createTextView("Conference Room 3", "Alicja, Justyna"));
+        linearLayout = (LinearLayout) findViewById(R.id.locations_table);
+    }
 
-        TextView updatedTextView = new TextView(this);
-        updatedTextView.setText("updated: " + new Date());
-        updatedTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
-        linearLayout.addView(updatedTextView);
+    ///////////////////////////////////////
+    // updating UI based on JSON message //
+    ///////////////////////////////////////
+    private void refreshUI(JSONObject roomStatusMessage){
+        linearLayout.removeAllViews();
+        try {
+            JSONArray rooms = roomStatusMessage.getJSONArray("rooms");
+            for (int i = 0 ; i < rooms.length(); i++) {
+                JSONObject room = rooms.getJSONObject(i);
+                String roomLabel = room.getString("label");
+                StringBuilder sb = new StringBuilder();
+                JSONArray users = room.getJSONArray("users");
+                for (int j = 0 ; j < users.length(); j++) {
+                    String user = users.getString(j);
+                    sb.append(user);
+                    if (j!=users.length()-1) sb.append(", ");
+                }
+                if (users.length()==0) sb.append("-");
+                linearLayout.addView(createTextView(roomLabel, sb.toString()));
+                linearLayout.addView(createSeparatorView());
+            }
+            TextView updatedTextView = new TextView(this);
+            updatedTextView.setText("updated: " + new Date());
+            updatedTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
+            linearLayout.addView(updatedTextView);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     private TextView createTextView(String location, String people){
@@ -81,29 +104,9 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         return separatorView;
     }
 
-    private void refreshUI(JSONObject roomStatusMessage){
-        try {
-            roomStatusMessage.getJSONArray("rooms");
-            //beaconId = data.getString("b_id");
-            //roomRadius = data.getString("room_radius");
-            //Log.i(TAG, "### received config from server");
-            //Log.i(TAG, "beaconId: "+beaconId);
-            //Log.i(TAG, "roomRadius: "+roomRadius);
-
-        } catch (JSONException e) {
-            Log.i(TAG, e.toString());
-            return;
-        }
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        beaconManager.unbind(this);
-        shutdownSocket();
-    }
-
+    /////////////////////
+    // beacon handling //
+    /////////////////////
     @Override
     public void onBeaconServiceConnect() {
         beaconManager.setRangeNotifier(new RangeNotifier() {
@@ -129,7 +132,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
 
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
-        } catch (RemoteException e) {  Log.e(TAG, e.getMessage()); }
+        } catch (RemoteException e) {  e.printStackTrace(); }
     }
 
     /////////////////////////////
@@ -151,7 +154,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     {
         try {
             mSocket = IO.socket("http://beatconf-freeportmetrics.rhcloud.com");
-        } catch (URISyntaxException e) {}
+        } catch (URISyntaxException e) { e.printStackTrace(); }
     }
 
     // received events
@@ -175,7 +178,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                         Log.i(TAG, "roomRadius: "+roomRadius);
 
                     } catch (JSONException e) {
-                        Log.i(TAG, "Socket.io exception: "+e.toString());
+                        e.printStackTrace();
                         return;
                     }
                 }
@@ -214,5 +217,12 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     }
     public void emitLeaveRoomEventAction(View view){
         emitLeaveRoomEvent("5919_60231");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
+        shutdownSocket();
     }
 }

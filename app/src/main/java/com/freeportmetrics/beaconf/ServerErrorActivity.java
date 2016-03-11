@@ -14,16 +14,6 @@ public class ServerErrorActivity extends AppCompatActivity {
     }
 
     public void retryServerConnection(View view){
-        ConfigurationService configurationService = new ConfigurationService();
-
-        try {
-            ConfigurationItem[] configurationItems = configurationService.getConfiguration();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Intent intent = new Intent(this, RoomStatusActivity.class);
-        startActivity(intent);
+        // TODO
     }
-
 }

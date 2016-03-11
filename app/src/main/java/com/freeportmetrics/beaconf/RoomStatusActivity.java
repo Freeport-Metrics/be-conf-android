@@ -121,7 +121,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                         if (distance < roomInfo.getRoomRadius() && !roomInfo.isOccupied()) {
                             emitEnterRoomEvent(roomId);
                             roomInfo.setOccupied(true);
-                        } else{ // check if user left the room
+                        } else if (distance > roomInfo.getRoomRadius() && roomInfo.isOccupied()){ // check if user left the room
                             emitLeaveRoomEvent(roomId);
                             roomInfo.setOccupied(false);
                         }

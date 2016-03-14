@@ -66,9 +66,9 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         debugTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
         debugLayout.addView(debugTextView);
 
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        // handling of case when client left beacons area before didRangeBeaconsInRegion was called //
-        //////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////
+        // handling of case when client left beacons area before beacon scan //
+        ///////////////////////////////////////////////////////////////////////
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {

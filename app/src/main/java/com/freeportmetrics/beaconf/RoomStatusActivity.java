@@ -40,7 +40,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     private HashMap<String,RoomInfo> roomInfoMap = new HashMap<String,RoomInfo>();
     private String userId;
     private LinearLayout linearLayout;
-    private Date lastBeaconScan;
     private LinearLayout debugLayout;
     private TextView debugTextView;
 
@@ -72,27 +71,23 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                if(lastBeaconScan!=null){
-                    Date beaconScanDate = Utils.addMinutesToDate(1, lastBeaconScan);
-                    Date currentDate = new Date();
-                    if (currentDate.after(beaconScanDate)){
-                        for (Map.Entry<String, RoomInfo> entry : roomInfoMap.entrySet()) {
-                            String roomId = entry.getKey();
-                            RoomInfo roomInfo = entry.getValue();
-                            if (roomInfo.getUsers().contains(userId)){
-                                emitLeaveRoomEvent(roomId);
-                            }
-                        }
+                for (Map.Entry<String, RoomInfo> entry : roomInfoMap.entrySet()) {
+                    String roomId = entry.getKey();
+                    RoomInfo roomInfo = entry.getValue();
+                    Date expirationDate = Utils.addSecondsToDate(20, roomInfo.getLastUpdate());
+                    Date dateNow = new Date();
+                    if (dateNow.after(expirationDate) && roomInfo.getUsers().contains(userId)){
+                        emitLeaveRoomEvent(roomId);
                     }
                 }
-                handler.postDelayed(this, 120000);
+                handler.postDelayed(this, 15000);
             }
-        }, 120000);
+        }, 15000);
     }
 
-    ///////////////////////////////////////
+    /////////////////////////////////////////
     // updating data based on JSON message //
-    ///////////////////////////////////////
+    /////////////////////////////////////////
     private void refreshRoomState(JSONObject roomStatusMessage){
         linearLayout.removeAllViews();
 
@@ -158,13 +153,12 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String debug = "";
-                        lastBeaconScan = new Date();
                         for (Beacon beacon : beacons) {
                             String roomId = beacon.getId2() + "_" + beacon.getId3();
                             double distance = beacon.getDistance();
-                            //debug("DEBUG: roomId: " + roomId + ", distance: " + distance);
+                            //debug("roomId: " + roomId + ", distance: " + distance);
                             RoomInfo roomInfo = roomInfoMap.get(roomId);
+                            roomInfo.setLastUpdate(new Date());
                             if (roomInfo != null) {
                                 // check if user entered the room
                                 if (distance < roomInfo.getRoomRadius() && !roomInfo.getUsers().contains(userId)) {
@@ -229,7 +223,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                             JSONObject configItem = config.getJSONObject(i);
                             String roomId = configItem.getString("b_id");
                             double roomRadius = configItem.getDouble("room_radius");
-                            RoomInfo roomInfo = new RoomInfo(roomId, roomRadius, new ArrayList());
+                            RoomInfo roomInfo = new RoomInfo(roomId, roomRadius, new ArrayList(), new Date());
                             roomInfoMap.put(configItem.getString("b_id"), roomInfo);
                         }
                     } catch (JSONException e) {

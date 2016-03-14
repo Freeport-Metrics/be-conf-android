@@ -1,16 +1,19 @@
 package com.freeportmetrics.beaconf;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class RoomInfo {
     private String id;
     private double roomRadius;
     private ArrayList users;
+    private Date lastUpdate;
 
-    public RoomInfo(String id, double roomRadius, ArrayList users) {
+    public RoomInfo(String id, double roomRadius, ArrayList users, Date lastUpdate) {
         this.id = id;
         this.roomRadius = roomRadius;
         this.users = users;
+        this.lastUpdate = lastUpdate;
     }
 
     public String getId() {
@@ -36,4 +39,8 @@ public class RoomInfo {
     public void setUsers(ArrayList users) {
         this.users = users;
     }
+
+    public Date getLastUpdate() { return lastUpdate; }
+
+    public void setLastUpdate(Date lastUpdate) { this.lastUpdate = lastUpdate; }
 }

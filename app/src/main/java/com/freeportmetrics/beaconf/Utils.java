@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class Utils {
@@ -21,18 +22,10 @@ public class Utils {
         return preferences.getString(key, null);
     }
 
-    /*
-    *  Convenience method to add a specified number of minutes to a Date object
-    *  From: http://stackoverflow.com/questions/9043981/how-to-add-minutes-to-my-date
-    *  @param  minutes  The number of minutes to add
-    *  @param  beforeTime  The time that will have minutes added to it
-    *  @return  A date object with the specified number of minutes added to it
-    */
-    public static Date addMinutesToDate(int minutes, Date beforeTime){
-        final long ONE_MINUTE_IN_MILLIS = 60000; //millisecs
-
-        long curTimeInMs = beforeTime.getTime();
-        Date afterAddingMins = new Date(curTimeInMs + (minutes * ONE_MINUTE_IN_MILLIS));
-        return afterAddingMins;
+    public static Date addSecondsToDate(int seconds, Date date){
+        Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
+        calendar.setTime(date);
+        calendar.add(Calendar.SECOND, seconds);
+        return calendar.getTime();
     }
 }

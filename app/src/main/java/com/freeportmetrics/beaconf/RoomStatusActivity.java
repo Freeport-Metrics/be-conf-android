@@ -43,7 +43,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     private String userId;
     private LinearLayout linearLayout;
     private Date lastBeaconScan;
-    private Handler mHandler;
     private LinearLayout debugLayout;
     private TextView debugTextView;
 
@@ -64,13 +63,34 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
 
         linearLayout = (LinearLayout) findViewById(R.id.locations_table);
 
-        mHandlerTask.run();
-
         // DEBUG
         debugLayout = (LinearLayout) findViewById(R.id.debug_view);
         debugTextView = new TextView(this);
         debugTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
         debugLayout.addView(debugTextView);
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // handling of case when client left beacons area before didRangeBeaconsInRegion was called //
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if(lastBeaconScan!=null){
+                    Date beaconScanDate = Utils.addMinutesToDate(1, lastBeaconScan);
+                    Date currentDate = new Date();
+                    if (currentDate.after(beaconScanDate)){
+                        for (Map.Entry<String, RoomInfo> entry : roomInfoMap.entrySet()) {
+                            String roomId = entry.getKey();
+                            RoomInfo roomInfo = entry.getValue();
+                            if (roomInfo.getUsers().contains(userId)){
+                                emitLeaveRoomEvent(roomId);
+                            }
+                        }
+                    }
+                }
+                handler.postDelayed(this, 12000);
+            }
+        }, 120000);
     }
 
     ///////////////////////////////////////
@@ -129,30 +149,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         separatorView.setBackgroundColor(Color.rgb(51, 51, 51));
         return separatorView;
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    // handling of case when client left beacons area before didRangeBeaconsInRegion was called //
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    Runnable mHandlerTask = new Runnable()
-    {
-        @Override
-        public void run() {
-            if(lastBeaconScan!=null){
-                Date beaconScanDate = Utils.addMinutesToDate(1, lastBeaconScan);
-                Date currentDate = new Date();
-                if (currentDate.after(beaconScanDate)){
-                    for (Map.Entry<String, RoomInfo> entry : roomInfoMap.entrySet()) {
-                        String roomId = entry.getKey();
-                        RoomInfo roomInfo = entry.getValue();
-                        if (roomInfo.getUsers().contains(userId)){
-                            emitEnterRoomEvent(roomId);
-                        }
-                    }
-                }
-                mHandler.postDelayed(mHandlerTask, INTERVAL);
-            }
-        }
-    };
 
     /////////////////////
     // beacon handling //

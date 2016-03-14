@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         if(userId!=null){
             Intent intent = new Intent(this, RoomStatusActivity.class);
             startActivity(intent);
+            finish();
         }
     }
     

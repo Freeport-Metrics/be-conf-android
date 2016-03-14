@@ -170,11 +170,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                         for (Beacon beacon : beacons) {
                             String roomId = beacon.getId2() + "_" + beacon.getId3();
                             double distance = beacon.getDistance();
-                            //if (debugTextView.getText().length() > 500) {
-                            //    debugTextView.setText("");
-                            //}
-                            //debugTextView.setText(debugTextView.getText() + "DEBUG: roomId: " + roomId + ", distance: " + distance + '\n');
-
+                            //debug("DEBUG: roomId: " + roomId + ", distance: " + distance);
                             RoomInfo roomInfo = roomInfoMap.get(roomId);
                             if (roomInfo != null) {
                                 // check if user entered the room
@@ -189,7 +185,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                 });
             }
         });
-
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {  e.printStackTrace(); }
@@ -252,7 +247,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                 @Override
                 public void run() {
                     Log.i(TAG, "Room status message: "+args[0]);
-                    debug("Room status message: "+args[0]);
+                    //debug("Room status message: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     refreshRoomState(data);
                 }
@@ -263,13 +258,13 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     // emitted events
     public void emitEnterRoomEvent(String roomId){
         Log.i(TAG, "Sending enter event to server, userId: " + userId + ", roomId: " + roomId);
-        debug("Sending enter event to server, userId: " + userId + ", roomId: " + roomId);
+        //debug("Sending enter event to server, userId: " + userId + ", roomId: " + roomId);
         mSocket.emit("enterRoom", "{\"user_id\":\"" + userId + "\",\"room_id\":\"" + roomId + "\"}");
     }
 
     public void emitLeaveRoomEvent(String roomId){
         Log.i(TAG, "Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
-        debug("Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
+        //debug("Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
         mSocket.emit("leaveRoom", "{\"user_id\":\"" + userId + "\",\"room_id\":\"" + roomId + "\"}");
     }
 
@@ -278,7 +273,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         super.onDestroy();
         beaconManager.unbind(this);
         shutdownSocket();
-        mHandler.removeCallbacks(mHandlerTask);
     }
 
     ///////////

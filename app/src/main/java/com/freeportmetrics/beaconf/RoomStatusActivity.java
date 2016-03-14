@@ -267,8 +267,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        beaconManager.unbind(this);
-        shutdownSocket();
     }
 
     ///////////

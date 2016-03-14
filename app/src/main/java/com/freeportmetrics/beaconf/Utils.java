@@ -6,9 +6,6 @@ import android.preference.PreferenceManager;
 
 import java.util.Date;
 
-/**
- * Created by marcin on 3/10/2016.
- */
 public class Utils {
     public final static String USER_ID_PREF_KEY = "com.freeportmetrics.beaconf.USER_ID";
 

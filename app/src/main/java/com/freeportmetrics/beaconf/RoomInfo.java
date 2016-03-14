@@ -1,11 +1,7 @@
 package com.freeportmetrics.beaconf;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-/**
- * Created by marcin on 3/10/2016.
- */
 public class RoomInfo {
     private String id;
     private double roomRadius;

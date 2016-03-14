@@ -1,7 +1,6 @@
 package com.freeportmetrics.beaconf;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,7 +36,6 @@ import org.json.JSONObject;
 public class RoomStatusActivity extends AppCompatActivity implements BeaconConsumer {
 
     protected final static String TAG = "RoomStatusActivity";
-    private final static int INTERVAL = 1000 * 60; // 1 minute
     private BeaconManager beaconManager;
     private HashMap<String,RoomInfo> roomInfoMap = new HashMap<String,RoomInfo>();
     private String userId;
@@ -54,7 +52,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
 
         setContentView(R.layout.activity_room_status);
 
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
@@ -186,6 +183,10 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         } catch (RemoteException e) {  e.printStackTrace(); }
     }
 
+    public void unbind(){
+        beaconManager.unbind(this);
+    }
+
     /////////////////////////////
     // Socket.io communication //
     /////////////////////////////
@@ -193,19 +194,23 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         mSocket.connect();
         mSocket.on("config", onConfigMessage);
         mSocket.on("room_status", onRoomStatusMessage);
+        mSocket.on("connect_error", onErrorMessage);
     }
 
     private void shutdownSocket(){
         mSocket.disconnect();
         mSocket.off("config", onConfigMessage);
         mSocket.off("room_status", onRoomStatusMessage);
+        mSocket.off("connect_error", onErrorMessage);
     }
 
     private Socket mSocket;
     {
         try {
             mSocket = IO.socket("http://beatconf-freeportmetrics.rhcloud.com");
-        } catch (URISyntaxException e) { e.printStackTrace(); }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     // received events
@@ -251,6 +256,17 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         }
     };
 
+    private Emitter.Listener onErrorMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            unbind();
+            shutdownSocket();
+            Intent intent = new Intent(RoomStatusActivity.this, ServerErrorActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    };
+
     // emitted events
     public void emitEnterRoomEvent(String roomId){
         Log.i(TAG, "Sending enter event to server, userId: " + userId + ", roomId: " + roomId);
@@ -262,11 +278,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         Log.i(TAG, "Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
         //debug("Sending leave event to server, userId: " + userId + ", roomId: " + roomId);
         mSocket.emit("leaveRoom", "{\"user_id\":\"" + userId + "\",\"room_id\":\"" + roomId + "\"}");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     ///////////

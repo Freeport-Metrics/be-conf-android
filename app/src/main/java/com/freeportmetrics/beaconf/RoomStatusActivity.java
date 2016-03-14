@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -34,11 +36,14 @@ import org.json.JSONObject;
 
 public class RoomStatusActivity extends AppCompatActivity implements BeaconConsumer {
 
-    protected static final String TAG = "RoomStatusActivity";
+    protected final static String TAG = "RoomStatusActivity";
+    private final static int INTERVAL = 1000 * 60; // 1 minute
     private BeaconManager beaconManager;
     private HashMap<String,RoomInfo> roomInfoMap = new HashMap<String,RoomInfo>();
     private String userId;
     private LinearLayout linearLayout;
+    private Date lastBeaconScan;
+    private Handler mHandler;
     private LinearLayout debugLayout;
     private TextView debugTextView;
 
@@ -51,13 +56,15 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         setContentView(R.layout.activity_room_status);
 
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        userId = SharedPreferencesHelper.getDefaults(SharedPreferencesHelper.USER_ID_PREF_KEY, this);
+        userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         beaconManager.bind(this);
 
         linearLayout = (LinearLayout) findViewById(R.id.locations_table);
+
+        mHandlerTask.run();
 
         // DEBUG
         debugLayout = (LinearLayout) findViewById(R.id.debug_view);
@@ -123,6 +130,30 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         return separatorView;
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // handling of case when client left beacons area before didRangeBeaconsInRegion was called //
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    Runnable mHandlerTask = new Runnable()
+    {
+        @Override
+        public void run() {
+            if(lastBeaconScan!=null){
+                Date beaconScanDate = Utils.addMinutesToDate(1, lastBeaconScan);
+                Date currentDate = new Date();
+                if (currentDate.after(beaconScanDate)){
+                    for (Map.Entry<String, RoomInfo> entry : roomInfoMap.entrySet()) {
+                        String roomId = entry.getKey();
+                        RoomInfo roomInfo = entry.getValue();
+                        if (roomInfo.getUsers().contains(userId)){
+                            emitEnterRoomEvent(roomId);
+                        }
+                    }
+                }
+                mHandler.postDelayed(mHandlerTask, INTERVAL);
+            }
+        }
+    };
+
     /////////////////////
     // beacon handling //
     /////////////////////
@@ -135,7 +166,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                     @Override
                     public void run() {
                         String debug = "";
-
+                        lastBeaconScan = new Date();
                         for (Beacon beacon : beacons) {
                             String roomId = beacon.getId2() + "_" + beacon.getId3();
                             double distance = beacon.getDistance();
@@ -194,7 +225,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
-                    System.out.println("Config message: "+args[0]);
+                    Log.i(TAG, "Config message: " + args[0]);
                     roomInfoMap.clear();
                     try {
                         JSONArray config = data.getJSONArray("config");
@@ -220,7 +251,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("Room status message: "+args[0]);
+                    Log.i(TAG, "Room status message: "+args[0]);
                     debug("Room status message: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     refreshRoomState(data);
@@ -247,6 +278,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         super.onDestroy();
         beaconManager.unbind(this);
         shutdownSocket();
+        mHandler.removeCallbacks(mHandlerTask);
     }
 
     ///////////

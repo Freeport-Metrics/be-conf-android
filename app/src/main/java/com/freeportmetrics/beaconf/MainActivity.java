@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String userId = SharedPreferencesHelper.getDefaults(SharedPreferencesHelper.USER_ID_PREF_KEY, this);
+        String userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
         if(userId!=null){
             Intent intent = new Intent(this, RoomStatusActivity.class);
             startActivity(intent);
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String userId = editText.getText().toString();
 
-        SharedPreferencesHelper.setDefaults(SharedPreferencesHelper.USER_ID_PREF_KEY, userId, this);
+        Utils.setDefaults(Utils.USER_ID_PREF_KEY, userId, this);
 
         Intent intent = new Intent(this, RoomStatusActivity.class);
         startActivity(intent);

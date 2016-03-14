@@ -88,9 +88,9 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                         }
                     }
                 }
-                handler.postDelayed(this, 12000);
+                handler.postDelayed(this, 120000);
             }
-        }, 12000);
+        }, 120000);
     }
 
     ///////////////////////////////////////

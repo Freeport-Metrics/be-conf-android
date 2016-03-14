@@ -42,6 +42,8 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     private LinearLayout linearLayout;
     private LinearLayout debugLayout;
     private TextView debugTextView;
+    private TextView connectionStatus;
+    private Socket mSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,10 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
         beaconManager.bind(this);
 
         linearLayout = (LinearLayout) findViewById(R.id.locations_table);
+
+        connectionStatus = new TextView(this);
+        connectionStatus.setText("Connecting to server ...");
+        linearLayout.addView(connectionStatus);
 
         // DEBUG
         debugLayout = (LinearLayout) findViewById(R.id.debug_view);
@@ -158,7 +164,6 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                             double distance = beacon.getDistance();
                             //debug("roomId: " + roomId + ", distance: " + distance);
                             RoomInfo roomInfo = roomInfoMap.get(roomId);
-                            roomInfo.setLastUpdate(new Date());
                             if (roomInfo != null) {
                                 // check if user entered the room
                                 if (distance < roomInfo.getRoomRadius() && !roomInfo.getUsers().contains(userId)) {
@@ -166,6 +171,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
                                 } else if (distance > roomInfo.getRoomRadius() && roomInfo.getUsers().contains(userId)) { // check if user left the room
                                     emitLeaveRoomEvent(roomId);
                                 }
+                                roomInfo.setLastUpdate(new Date());
                             }
                         }
                     }
@@ -185,26 +191,26 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
     // Socket.io communication //
     /////////////////////////////
     private void setupSocket(){
+        try {
+            IO.Options opts = new IO.Options();
+            opts.reconnectionAttempts = 3;
+            opts.reconnectionDelay = 3000;
+            opts.forceNew = true;
+            mSocket = IO.socket("http://beatconf-freeportmetrics.rhcloud.com", opts);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         mSocket.connect();
         mSocket.on("config", onConfigMessage);
         mSocket.on("room_status", onRoomStatusMessage);
-        mSocket.on("connect_error", onErrorMessage);
+        mSocket.on("reconnect_failed", onErrorMessage);
     }
 
     private void shutdownSocket(){
         mSocket.disconnect();
         mSocket.off("config", onConfigMessage);
         mSocket.off("room_status", onRoomStatusMessage);
-        mSocket.off("connect_error", onErrorMessage);
-    }
-
-    private Socket mSocket;
-    {
-        try {
-            mSocket = IO.socket("http://beatconf-freeportmetrics.rhcloud.com");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        mSocket.off("reconnect_failed", onErrorMessage);
     }
 
     // received events
@@ -214,6 +220,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    linearLayout.removeView(connectionStatus);
                     JSONObject data = (JSONObject) args[0];
                     Log.i(TAG, "Config message: " + args[0]);
                     roomInfoMap.clear();
@@ -241,7 +248,7 @@ public class RoomStatusActivity extends AppCompatActivity implements BeaconConsu
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.i(TAG, "Room status message: "+args[0]);
+                    Log.i(TAG, "Room status message: " + args[0]);
                     //debug("Room status message: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     refreshRoomState(data);

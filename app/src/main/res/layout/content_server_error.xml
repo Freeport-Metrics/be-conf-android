@@ -16,8 +16,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Server error."
+        android:text="Unable to connect to server."
         android:id="@+id/textView3"
         android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="retryServerConnection"
+        android:text="RETRY"
+        android:id="@+id/button2"
+        android:layout_below="@+id/textView3"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>

@@ -110,11 +110,13 @@ public class RoomStatusActivity extends AppCompatActivity{
         }
         mSocket.connect();
         mSocket.on("room_status", onRoomStatusMessage);
+        mSocket.on("reconnect_failed", onErrorMessage);
     }
 
     private void shutdownSocket(){
         mSocket.disconnect();
         mSocket.off("room_status", onRoomStatusMessage);
+        mSocket.off("reconnect_failed", onErrorMessage);
     }
 
     private Emitter.Listener onRoomStatusMessage = new Emitter.Listener() {
@@ -133,6 +135,16 @@ public class RoomStatusActivity extends AppCompatActivity{
                     updateView(roomStates);
                 }
             });
+        }
+    };
+
+    private Emitter.Listener onErrorMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            shutdownSocket();
+            Intent intent = new Intent(RoomStatusActivity.this, ServerErrorActivity.class);
+            startActivity(intent);
+            finish();
         }
     };
 

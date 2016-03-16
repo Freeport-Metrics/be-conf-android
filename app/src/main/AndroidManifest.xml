@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -25,20 +25,20 @@
         <activity
             android:name=".activity.RoomStatusActivity"
             android:label="@string/title_activity_display_message"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName=".activity.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity" />
+                android:value=".activity.LoginActivity" />
         </activity>
         <activity
             android:name=".activity.ServerErrorActivity"
             android:label="@string/title_activity_server_error"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName=".activity.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity" />
+                android:value=".activity.LoginActivity" />
         </activity>
     </application>
 

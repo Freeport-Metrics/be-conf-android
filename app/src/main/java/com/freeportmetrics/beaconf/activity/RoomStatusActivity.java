@@ -48,8 +48,6 @@ public class RoomStatusActivity extends AppCompatActivity{
 
         // DEBUG
         addDebug();
-
-        // TODO: handle socket.io reconnection
     }
 
     ////////

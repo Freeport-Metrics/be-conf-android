@@ -11,7 +11,7 @@ import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
 public class BeconfApplication extends Application implements BootstrapNotifier {
-    private static final String TAG = ".MyApplicationName";
+    private static final String TAG = "BeconfApplication";
     private RegionBootstrap regionBootstrap;
 
     @Override
@@ -34,12 +34,14 @@ public class BeconfApplication extends Application implements BootstrapNotifier 
 
     @Override
     public void didEnterRegion(Region arg0) {
+        String userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
         String regionId = arg0.getId2()+"_"+arg0.getId3();
         Log.i(TAG, "Got a didEnterRegion call for regionId: "+regionId);
     }
 
     @Override
     public void didExitRegion(Region arg0) {
+        String userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
         String regionId = arg0.getId2()+"_"+arg0.getId3();
         Log.i(TAG, "Got a didExitRegion call for regionId: "+regionId);
     }

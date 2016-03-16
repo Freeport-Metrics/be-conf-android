@@ -37,6 +37,10 @@ public class RoomStatusActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_room_status);
+        View someView = findViewById(R.id.content);
+        View root = someView.getRootView();
+        root.setBackgroundColor(getResources().getColor(android.R.color.white));
+
         linearLayout = (LinearLayout) findViewById(R.id.locations_table);
 
         connectionStatus = new TextView(this);
@@ -47,7 +51,7 @@ public class RoomStatusActivity extends AppCompatActivity{
         setupSocket();
 
         // DEBUG
-        addDebug();
+        //addDebug();
     }
 
     ////////
@@ -86,12 +90,13 @@ public class RoomStatusActivity extends AppCompatActivity{
         return separatorView;
     }
 
+    /*
     private void addDebug(){
         debugLayout = (LinearLayout) findViewById(R.id.debug_view);
         debugTextView = new TextView(this);
         debugTextView.setTextAppearance(this, android.R.style.TextAppearance_Small);
         debugLayout.addView(debugTextView);
-    }
+    }*/
 
     /////////////////////////////
     // Socket.io communication //

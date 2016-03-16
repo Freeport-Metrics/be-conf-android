@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,23 +23,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RoomStatusActivity"
+            android:name=".activity.RoomStatusActivity"
             android:label="@string/title_activity_display_message"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.freeportmetrics.beaconf.MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
         <activity
-            android:name=".ServerErrorActivity"
+            android:name=".activity.ServerErrorActivity"
             android:label="@string/title_activity_server_error"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.freeportmetrics.beaconf.MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
+        <service android:name=".service.BeaconMonitoringService"/>
     </application>
 
 </manifest>

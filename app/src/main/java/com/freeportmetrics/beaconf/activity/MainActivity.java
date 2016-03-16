@@ -1,4 +1,4 @@
-package com.freeportmetrics.beaconf;
+package com.freeportmetrics.beaconf.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+
+import com.freeportmetrics.beaconf.R;
+import com.freeportmetrics.beaconf.Utils;
 
 public class MainActivity extends AppCompatActivity {
     @Override

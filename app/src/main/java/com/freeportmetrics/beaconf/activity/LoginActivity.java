@@ -20,9 +20,9 @@ public class LoginActivity extends AppCompatActivity {
 
         String userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
         if(userId!=null){
-            //Intent intent = new Intent(this, RoomStatusActivity.class);
-            //startActivity(intent);
-            //finish();
+            Intent intent = new Intent(this, RoomStatusActivity.class);
+            startActivity(intent);
+            finish();
         }
     }
     

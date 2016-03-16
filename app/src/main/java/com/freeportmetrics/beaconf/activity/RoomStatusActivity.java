@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.freeportmetrics.beaconf.R;
 import com.freeportmetrics.beaconf.model.RoomStatus;
-import com.freeportmetrics.beaconf.service.BeaconMonitoringService;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -43,10 +42,6 @@ public class RoomStatusActivity extends AppCompatActivity{
         connectionStatus = new TextView(this);
         connectionStatus.setText("Connecting to server ...");
         linearLayout.addView(connectionStatus);
-
-        // Starting beacon monitoring service
-        Intent intent = new Intent(this, BeaconMonitoringService.class);
-        startService(intent);
 
         // Starting socket.io
         setupSocket();

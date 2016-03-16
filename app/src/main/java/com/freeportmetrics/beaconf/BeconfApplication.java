@@ -41,6 +41,6 @@ public class BeconfApplication extends Application implements BootstrapNotifier 
     @Override
     public void didExitRegion(Region arg0) {
         String regionId = arg0.getId2()+"_"+arg0.getId3();
-        Log.i(TAG, "Got a didEnterRegion call for regionId: "+regionId);
+        Log.i(TAG, "Got a didExitRegion call for regionId: "+regionId);
     }
 }

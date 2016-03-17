@@ -75,13 +75,13 @@ public class RoomStatusActivity extends AppCompatActivity{
             rowLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
             LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            rowLinearLayout.setWeightSum(6f);
             rowLinearLayout.setLayoutParams(LLParams);
 
             ImageView statusIcon = new ImageView(this);
             statusIcon.setImageResource(roomStatus.getUsers().isEmpty() ? R.drawable.ic_free : R.drawable.ic_occupied);
-            statusIcon.setPadding(0,20,0,0);
+
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(60,60);
+            params.setMargins(0,10,0,0);
             statusIcon.setLayoutParams(params);
 
             rowLinearLayout.addView(statusIcon);

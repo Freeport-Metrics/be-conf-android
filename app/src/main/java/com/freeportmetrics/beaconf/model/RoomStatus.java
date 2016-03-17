@@ -41,11 +41,15 @@ public class RoomStatus {
             ArrayList<String> users = new ArrayList<String>();
             for (int j = 0; j < usersData.length(); j++) {
                 JSONObject user = usersData.getJSONObject(j);
-                String userName = user.getString("name");
-                users.add(userName);
+                try {
+                    String userName = user.getString("name");
+                    users.add(userName);
+                } catch(JSONException e){
+                    continue;
+                }
             }
             RoomStatus roomStatus = new RoomStatus(label, users);
-            roomStatuses.add(roomStatus);
+                roomStatuses.add(roomStatus);
         }
         return roomStatuses;
     }

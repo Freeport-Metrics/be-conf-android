@@ -9,6 +9,8 @@ import android.widget.EditText;
 import com.freeportmetrics.beaconf.R;
 import com.freeportmetrics.beaconf.Utils;
 
+import java.util.UUID;
+
 public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,8 +20,7 @@ public class LoginActivity extends AppCompatActivity {
         View root = someView.getRootView();
         root.setBackgroundColor(getResources().getColor(android.R.color.white));
 
-        String userId = Utils.getDefaults(Utils.USER_ID_PREF_KEY, this);
-        if(userId!=null){
+        if(Utils.getDefaults(Utils.USER_NAME_PREF_KEY, this) != null){
             Intent intent = new Intent(this, RoomStatusActivity.class);
             startActivity(intent);
             finish();
@@ -29,8 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     public void submitUserId(View view) {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String userId = editText.getText().toString();
-        Utils.setDefaults(Utils.USER_ID_PREF_KEY, userId, this);
-
+        Utils.setDefaults(Utils.USER_NAME_PREF_KEY, userId, this);
+        Utils.setDefaults(Utils.USER_ID_PREF_KEY, UUID.randomUUID().toString(), this);
         Intent intent = new Intent(this, RoomStatusActivity.class);
         startActivity(intent);
     }

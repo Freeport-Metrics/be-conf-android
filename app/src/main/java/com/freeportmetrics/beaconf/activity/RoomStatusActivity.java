@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -63,9 +64,29 @@ public class RoomStatusActivity extends AppCompatActivity{
             StringBuilder sb = new StringBuilder();
             for(String user: roomStatus.getUsers()) {
                 sb.append(user);
+                sb.append(", ");
             }
             if (roomStatus.getUsers().isEmpty()) sb.append("-");
-            linearLayout.addView(createTextView(roomStatus.getLabel(), sb.toString()));
+            String users = sb.toString();
+            if(users.endsWith(", ")) users = users.substring(0, users.length()-2);
+
+            LinearLayout rowLinearLayout = new LinearLayout(this);
+            rowLinearLayout.setBackgroundColor(Color.WHITE);
+            rowLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            rowLinearLayout.setWeightSum(6f);
+            rowLinearLayout.setLayoutParams(LLParams);
+
+            ImageView statusIcon = new ImageView(this);
+            statusIcon.setImageResource(roomStatus.getUsers().isEmpty() ? R.drawable.ic_free : R.drawable.ic_occupied);
+            statusIcon.setPadding(0,20,0,0);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(60,60);
+            statusIcon.setLayoutParams(params);
+
+            rowLinearLayout.addView(statusIcon);
+            rowLinearLayout.addView(createTextView(roomStatus.getLabel(), users));
+            linearLayout.addView(rowLinearLayout);
             linearLayout.addView(createSeparatorView());
         }
 
@@ -75,7 +96,7 @@ public class RoomStatusActivity extends AppCompatActivity{
         linearLayout.addView(updatedTextView);
     }
 
-    private TextView createTextView(String location, String people){
+    private TextView createTextView(String location, String people) {
         TextView textView = new TextView(this);
         textView.setText(location + ": " + people);
         textView.setPadding(5, 5, 5, 5);

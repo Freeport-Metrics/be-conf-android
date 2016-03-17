@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
@@ -48,6 +50,14 @@ public class RoomStatusActivity extends AppCompatActivity{
         connectionStatus.setText("Connecting to server ...");
         linearLayout.addView(connectionStatus);
 
+        // animated gif
+        /*
+        WebView webView = (WebView) findViewById(R.id.webView);
+        webView.setPadding(1, 1, 1, 1);
+        webView.setInitialScale(250);
+        webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        webView.loadUrl("http://artefutureplay-20905.onmodulus.net/img/loading2.gif");
+        */
         // Starting socket.io
         setupSocket();
 

@@ -50,14 +50,6 @@ public class RoomStatusActivity extends AppCompatActivity{
         connectionStatus.setText("Connecting to server ...");
         linearLayout.addView(connectionStatus);
 
-        // animated gif
-        /*
-        WebView webView = (WebView) findViewById(R.id.webView);
-        webView.setPadding(1, 1, 1, 1);
-        webView.setInitialScale(250);
-        webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        webView.loadUrl("http://artefutureplay-20905.onmodulus.net/img/loading2.gif");
-        */
         // Starting socket.io
         setupSocket();
 

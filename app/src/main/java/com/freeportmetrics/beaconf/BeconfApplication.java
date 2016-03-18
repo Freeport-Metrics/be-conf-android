@@ -1,6 +1,7 @@
 package com.freeportmetrics.beaconf;
 
 import android.app.Application;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.gson.GsonBuilder;
@@ -28,10 +29,15 @@ public class BeconfApplication extends Application implements BootstrapNotifier 
         BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
 
-        beaconManager.setBackgroundScanPeriod(3000l);
-        beaconManager.setBackgroundBetweenScanPeriod(6000l);
-        beaconManager.setForegroundScanPeriod(3000l);
-        beaconManager.setForegroundBetweenScanPeriod(6000l);
+        beaconManager.setBackgroundScanPeriod(5000l);
+        beaconManager.setBackgroundBetweenScanPeriod(10000l);
+        beaconManager.setForegroundScanPeriod(5000l);
+        beaconManager.setForegroundBetweenScanPeriod(10000l);
+        try {
+            beaconManager.updateScanPeriods();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         Region icy = new Region("com.freeportmetrics.icy", Identifier.parse("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), Identifier.fromInt(45287), Identifier.fromInt(53858));
         Region blueBerry = new Region("com.freeportmetrics.blueBerry", Identifier.parse("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), Identifier.fromInt(10344), Identifier.fromInt(31183));

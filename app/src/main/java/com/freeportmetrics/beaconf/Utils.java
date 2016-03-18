@@ -1,9 +1,12 @@
 package com.freeportmetrics.beaconf;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.google.gson.GsonBuilder;
 

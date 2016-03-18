@@ -30,9 +30,9 @@ public class BeconfApplication extends Application implements BootstrapNotifier 
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
 
         beaconManager.setBackgroundScanPeriod(5000l);
-        beaconManager.setBackgroundBetweenScanPeriod(10000l);
+        beaconManager.setBackgroundBetweenScanPeriod(300l);
         beaconManager.setForegroundScanPeriod(5000l);
-        beaconManager.setForegroundBetweenScanPeriod(10000l);
+        beaconManager.setForegroundBetweenScanPeriod(300l);
         try {
             beaconManager.updateScanPeriods();
         } catch (RemoteException e) {
